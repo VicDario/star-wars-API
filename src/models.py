@@ -19,13 +19,27 @@ class People(db.Model):
             "name": self.name,
             "height": self.height,
             "mass": self.mass,
-            "skin_color": self.skin_color
+            "skin_color": self.skin_color,
+            "eye_color": self.eye_color,
+            "birth_year": self.birth_year,
+            "gender": self.gender
         }
+        
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
 class Planet(db.Model):
     __tablename__ = 'planet'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(id.String(25), unique=True)
+    name = db.Column(db.String(25), unique=True)
     diameter = db.Column(db.Integer, nullable=False)
     rotation_period = db.Column(db.Integer, nullable=False)
     orbital_period = db.Column(db.Integer, nullable=False)
@@ -49,25 +63,53 @@ class Planet(db.Model):
             "surface_water": self.surface_water
         }
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False, unique=True)
     email = db.Column(db.String(50), nullable=False, unique=True)
     password = db.Column(db.String(30), nullable=False)
+    favorites = db.relationship('Favorite', cascade='all, delete', backref='User')
 
     def serialize(self):
         return {
             "id": self.id,
             "username": self.username,
-            "email": self.email
+            "email": self.email,
+            "favorites": self.serialize_favorites()
         }
+
+    def serialize_favorites(self):
+        return list(map(lambda favorite: favorite.serialize(), self.favorites))
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
 class Favorite(db.Model):
     __tablename__ = 'favorite'
     id = db.Column(db.Integer, primary_key=True)
     favorite_type = db.Column(db.String(10), nullable=False)
     favorite_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
 
     def serialize(self):
         return {
@@ -75,3 +117,13 @@ class Favorite(db.Model):
             "favorite_type": self.favorite_type,
             "favorite_id": self.favorite_id
         }
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

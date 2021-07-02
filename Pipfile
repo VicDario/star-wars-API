@@ -20,3 +20,4 @@ init = "flask db init" # crea la carpeta migrations
 migrate = "flask db migrate" # transforma todos los modelos del archivo models.py en migraciones
 upgrade = "flask db upgrade" # ejecuta todas las migraciones sobre la base de datos
 downgrade = "flask db downgrade" # regresa la base de datos a un estado anterior
+start = "python src/app.py"
