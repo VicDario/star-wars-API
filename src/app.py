@@ -109,47 +109,45 @@ def gets_favorite():
     favorites = list(map(lambda favorite: favorite.serialize(), favorites))
     return jsonify(favorites), 200
 
-@app.route('/api/favorite/planet/<int:planet_id>', methods=['POST'])
-def add_planet_to_favorite(planet_id):
-    user = User.query.get(1) 
+@app.route('/api/favorite/planet/<int:planet_id>', methods=['POST', 'DELETE'])
+def favorite_planet(planet_id):
+    if(request.method == 'POST'):
+        user = User.query.get(1) 
 
-    favorite = Favorite()
-    favorite.favorite_type = "planet"
-    favorite.favorite_id = planet_id
-    favorite.user_id = user.id
+        favorite = Favorite()
+        favorite.favorite_type = "planet"
+        favorite.favorite_id = planet_id
+        favorite.user_id = user.id
 
-    favorite.save()
+        favorite.save()
+        return jsonify("Successfully added"), 201
 
-    return jsonify("Successfully added"), 201
+    if(request.method == 'DELETE'):
+        planet = Favorite.query.filter_by(favorite_id=planet_id, favorite_type="planet", user_id = 1).first()
+        planet.delete()
+        
+        return jsonify({"success": "Planet deleted from favorites"}), 200
 
-@app.route('/api/favorite/people/<int:people_id>', methods=['POST'])
-def add_people_to_favorite(people_id):
-    user = User.query.get(2) 
+@app.route('/api/favorite/people/<int:people_id>', methods=['POST', 'DELETE'])
+def favorite_people(people_id):
+    if(request.method == 'POST'):
+        user = User.query.get(1) 
 
-    favorite = Favorite()
-    favorite.favorite_type = "people"
-    favorite.favorite_id = people_id
-    favorite.user_id = user.id
+        favorite = Favorite()
+        favorite.favorite_type = "people"
+        favorite.favorite_id = people_id
+        favorite.user_id = user.id
 
-    favorite.save()
+        favorite.save()
 
-    return jsonify("Successfully added"), 201
+        return jsonify("Successfully added"), 201
 
-@app.route('/api/favorite/planet/<int:planet_id>', methods=['DELETE'])
-def delete_planet_at_favorites(planet_id):
-    planet = Favorite.query.filter_by(favorite_id=planet_id, user_id = 1).first()
-    db.session.delete(planet)
-    db.session.commit()
+    if(request.method == 'DELETE'):
+        people = Favorite.query.filter_by(favorite_id=people_id, favorite_type="people", user_id = 1).first()
+        db.session.delete(people)
+        db.session.commit()
 
-    return jsonify({"success": "Planet deleted from favorites"}), 200
-
-@app.route('/api/favorite/people/<int:people_id>', methods=['DELETE'])
-def delete_people_at_favorites(people_id):
-    people = Favorite.query.filter_by(favorite_id=people_id, user_id = 1).first()
-    db.session.delete(people)
-    db.session.commit()
-
-    return jsonify({ "success": "People deleted from favorites"}), 200
-
+        return jsonify({ "success": "People deleted from favorites"}), 200
+    
 if __name__ == '__main__':
     app.run()
