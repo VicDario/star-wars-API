@@ -1,6 +1,6 @@
 from flask import Flask, json, jsonify, request, render_template
 from flask_migrate import Migrate
-from models import Favorite, Planet, User, db, People
+from models import Favorite, Planet, Specie, User, db, People
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -82,6 +82,47 @@ def get_planet(planet_id):
     planet = Planet.query.get(planet_id)
     planet = list(planet.serialize())
     return jsonify(planet), 200
+
+@app.route('/api/specie', methods=['GET', 'POST'])
+def planets():
+    if(request.method == 'GET'):
+        species = Specie.query.all()
+        species = list(map(lambda specie: specie.serialize(), species))
+        return jsonify(planets), 200
+
+    if(request.method == 'POST'):
+        name = request.json.get('name')
+        classification = request.json.get('classification')
+        designation = request.json.get('designation')
+        average_height = request.json.get('average_height')
+        average_lifespan = request.json.get('average_lifespan')
+        hair_colors = request.json.get('hair_colors')
+        skin_colors = request.json.get('skin_colors')
+        eye_colors = request.json.get('eye_colors')
+        homeworld = request.json.get('homeworld')
+        language = request.json.get('language')
+
+        specie = Specie()
+        specie.name = name
+        specie.classification = classification
+        specie.designation = designation
+        specie.average_height = average_height
+        specie.average_lifespan = average_lifespan
+        specie.hair_colors = hair_colors
+        specie.skin_colors = skin_colors
+        specie.eye_colors = eye_colors
+        specie.homeworld = homeworld
+        specie.language = language
+
+        specie.save()
+        return jsonify({"Success": "created"}), 201
+
+@app.route('/api/specie/<int:specie_id>', methods=['GET'])
+def get_planet(specie_id):
+    specie = Specie.query.get(specie_id)
+    specie = list(specie.serialize())
+    return jsonify(specie), 200
+
 
 @app.route('/api/users', methods=['GET', 'POST'])
 def users():

@@ -74,6 +74,31 @@ class Planet(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+class Specie(db.Model):
+    __tablename__ = 'specie'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    classification = db.Column(db.String(30), nullable=False)
+    designation = db.Column(db.String(30), nullable=False)
+    average_height = db.Column(db.String(4), nullable=False)
+    average_lifespan = db.Column(db.String(4), nullable=False)
+    hair_colors = db.Column(db.String(50), nullable=False)
+    skin_colors = db.Column(db.String(50), nullable=False)
+    eye_colors = db.Column(db.String(50), nullable=False)
+    homeworld = db.Column(db.String(50))
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "classification": self.classification,
+            "designation": self.designation,
+            "average_height": self.average_height,
+            "hair_colors": self.hair_colors,
+            "eyes_colors": self.eye_colors,
+            "homeworld": self.homeworld
+        }
+
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
