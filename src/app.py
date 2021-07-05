@@ -1,14 +1,43 @@
+import dotenv
+from dotenv.main import dotenv_values
 from flask import Flask, json, jsonify, request, render_template
 from flask_migrate import Migrate
 from models import Favorite, Planet, Specie, Starship, User, db, People
+from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['ENV'] = 'development'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db' 
+app.config["JWT_SECRET_KEY"] = os.environ.get("SECRET_KEY")
+
 db.init_app(app)
 Migrate(app, db) # init, migrate, upgrade
+
+jwt = JWTManager(app)
+
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+    user = User.query.filter_by(username=username, password=password).first()
+    if user is None:
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token)
+
+@app.route("/protected", methods=["GET"])
+@jwt_required()
+def protected():
+    # Access the identity of the current user with get_jwt_identity
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
 
 @app.route('/api/people', methods=['GET', 'POST'])
 def all_people():
