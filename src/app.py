@@ -1,6 +1,6 @@
 from flask import Flask, json, jsonify, request, render_template
 from flask_migrate import Migrate
-from models import Favorite, Planet, Specie, User, db, People
+from models import Favorite, Planet, Specie, Starship, User, db, People
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -118,10 +118,56 @@ def specie():
         return jsonify({"Success": "created"}), 201
 
 @app.route('/api/specie/<int:specie_id>', methods=['GET'])
-def get_planet(specie_id):
+def get_specie(specie_id):
     specie = Specie.query.get(specie_id)
     specie = list(specie.serialize())
     return jsonify(specie), 200
+
+@app.route('/api/starship', methods=['GET', 'POST'])
+def specie():
+    if(request.method == 'GET'):
+        starships = Starship.query.all()
+        starships = list(map(lambda starship: starship.serialize(), starships))
+        return jsonify(starships), 200
+
+    if(request.method == 'POST'):
+        name = request.json.get('name')
+        model = request.json.get('model')
+        starship_class = request.json.get('starship_class')
+        manufacturer = request.json.get('manufacturer')
+        cost_in_credits = request.json.get('cost_in_credits')
+        length = request.json.get('length')
+        crew = request.json.get('crew')
+        passengers = request.json.get('passengers')
+        max_atmosphering_speed = request.json.get('max_atmosphering_speed')
+        hyperdrive_rating = request.json.get('hyperdrive_rating')
+        MGLT = request.json.get('MGLT')
+        cargo_capacity = request.json.get('cargo_capacity')
+        consumables = request.json.get('consumables')
+
+        starship = Starship()
+        starship.name = name
+        starship.model = model
+        starship.starship_class = starship_class
+        starship.manufacturer = manufacturer
+        starship.cost_in_credits = cost_in_credits
+        starship.length = length
+        starship.crew = crew
+        starship.passengers = passengers
+        starship.max_atmosphering_speed = max_atmosphering_speed
+        starship.hyperdrive_rating = hyperdrive_rating
+        starship.MGLT = MGLT
+        starship.cargo_capacity = cargo_capacity
+        starship.consumables = consumables
+
+        starship.save()
+        return jsonify({"Success": "created"}), 201
+
+@app.route('/api/specie/<int:starship_id>', methods=['GET'])
+def starship(starship_id):
+    starship = Specie.query.get(starship_id)
+    starship = list(starship.serialize())
+    return jsonify(starship), 200
 
 
 @app.route('/api/users', methods=['GET', 'POST'])
