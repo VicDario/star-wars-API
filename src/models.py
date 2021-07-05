@@ -98,6 +98,17 @@ class Specie(db.Model):
             "eyes_colors": self.eye_colors,
             "homeworld": self.homeworld
         }
+        
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
 class User(db.Model):
     __tablename__ = 'user'

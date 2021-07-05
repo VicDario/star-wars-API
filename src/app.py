@@ -84,11 +84,11 @@ def get_planet(planet_id):
     return jsonify(planet), 200
 
 @app.route('/api/specie', methods=['GET', 'POST'])
-def planets():
+def specie():
     if(request.method == 'GET'):
         species = Specie.query.all()
         species = list(map(lambda specie: specie.serialize(), species))
-        return jsonify(planets), 200
+        return jsonify(species), 200
 
     if(request.method == 'POST'):
         name = request.json.get('name')
