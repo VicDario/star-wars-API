@@ -1,6 +1,4 @@
-from enum import unique
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.datastructures import ContentSecurityPolicy
 db = SQLAlchemy()
 
 class People(db.Model):
@@ -86,7 +84,8 @@ class Specie(db.Model):
     hair_colors = db.Column(db.String(50), nullable=False)
     skin_colors = db.Column(db.String(50), nullable=False)
     eye_colors = db.Column(db.String(50), nullable=False)
-    homeworld = db.Column(db.String(50))
+    language = db.Column(db.String(30), nullable=False)
+    homeworld = db.Column(db.String(50), nullable=False)
 
     def serialize(self):
         return {
@@ -97,6 +96,7 @@ class Specie(db.Model):
             "average_height": self.average_height,
             "hair_colors": self.hair_colors,
             "eyes_colors": self.eye_colors,
+            "language": self.language,
             "homeworld": self.homeworld
         }
 
@@ -118,7 +118,7 @@ class Starship(db.Model):
     starship_class = db.Column(db.String(100), nullable=False)
     manufacturer = db.Column(db.String(100), nullable=False)
     cost_in_credits = db.Column(db.String(50), nullable=False)
-    lenght = db.Column(db.String(50), nullable=False)
+    length = db.Column(db.String(50), nullable=False)
     crew = db.Column(db.String(30), nullable=False)
     passengers = db.Column(db.String(20), nullable=False)
     max_atmosphering_speed = db.Column(db.String(20), nullable=False)
@@ -128,7 +128,7 @@ class Starship(db.Model):
     consumables = db.Column(db.String(20), nullable=False)
     name = db.Column(db.String(30), nullable=False)
 
-    def serialze(self):
+    def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
@@ -136,7 +136,7 @@ class Starship(db.Model):
             "starship_class": self.starship_class,
             "manufacturer": self.manufacturer,
             "cost_in_credits": self.cost_in_credits,
-            "lenght": self.lenght,
+            "length": self.length,
             "crew": self.crew,
             "passagers": self.passengers,
             "max_atmosphering_speed": self.max_atmosphering_speed,
