@@ -1,5 +1,3 @@
-import dotenv
-from dotenv.main import dotenv_values
 from flask import Flask, json, jsonify, request, render_template
 from flask_migrate import Migrate
 from models import Favorite, Planet, Specie, Starship, User, db, People
@@ -27,17 +25,10 @@ def login():
     password = request.json.get("password", None)
     user = User.query.filter_by(username=username, password=password).first()
     if user is None:
-        return jsonify({"msg": "Bad username or password"}), 401
+        return jsonify({"Error": "Bad username or password"}), 401
 
     access_token = create_access_token(identity=username)
     return jsonify(access_token=access_token)
-
-@app.route("/protected", methods=["GET"])
-@jwt_required()
-def protected():
-    # Access the identity of the current user with get_jwt_identity
-    current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
 
 @app.route('/api/people', methods=['GET', 'POST'])
 def all_people():
@@ -47,22 +38,14 @@ def all_people():
         return jsonify(people), 200
 
     if (request.method == 'POST'):
-        name = request.json.get('name')
-        height = request.json.get('height')
-        mass = request.json.get('mass')
-        skin_color = request.json.get('skin_color')
-        eye_color = request.json.get('eye_color')
-        birth_year = request.json.get('birth_year')
-        gender = request.json.get('gender')
-
         people = People()
-        people.name = name
-        people.height = height
-        people.mass = mass
-        people.skin_color = skin_color
-        people.eye_color = eye_color
-        people.birth_year = birth_year
-        people.gender = gender
+        people.name = request.json.get('name')
+        people.height = request.json.get('height')
+        people.mass = request.json.get('mass')
+        people.skin_color = request.json.get('skin_color')
+        people.eye_color = request.json.get('eye_color')
+        people.birth_year = request.json.get('birth_year')
+        people.gender = request.json.get('gender')
 
         people.save()
         return jsonify({"Success": "created"})
@@ -74,6 +57,33 @@ def get_person(people_id):
     person = list(person.serialize())
     return jsonify(person), 200
 
+@app.route('/api/people/<int:people_id>', methods=['PUT'])
+@jwt_required()
+def put_people(people_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).one_or_none()
+    if user.id == 1:
+        people = People.query.get(people_id)
+
+        if request.json.get('name') is not None:
+            people.name = request.json.get('name')
+        if request.json.get('height') is not None:
+            people.height = request.json.get('height')
+        if request.json.get('mass') is not None:
+            people.mass = request.json.get('mass')
+        if request.json.get('skin_color') is not None:
+            people.skin_color = request.json.get('skin_color')
+        if request.json.get('eye_color') is not None:
+            people.eye_color = request.json.get('eye_color')
+        if request.json.get('birth_year') is not None:
+            people.birth_year = request.json.get('birth_year')
+        if request.json.get('gender') is not None:
+            people.gender = request.json.get('gender')
+
+        return jsonify({"Success": "Changes apply"})
+    else:
+        return jsonify({"Error": "You don´t have permissions for this"})
+
 @app.route('/api/planet', methods=['GET', 'POST'])
 def planets():
     if(request.method == 'GET'):
@@ -82,26 +92,16 @@ def planets():
         return jsonify(planets), 200
 
     if(request.method == 'POST'):
-        name = request.json.get('name')
-        diameter = request.json.get('diameter')
-        rotation_period = request.json.get('rotation_period')
-        orbital_period = request.json.get('orbital_period')
-        gravity = request.json.get('gravity')
-        population = request.json.get('population')
-        climate = request.json.get('climate')
-        terrain = request.json.get('terrain')
-        surface_water = request.json.get('surface_water')
-
         planet = Planet()
-        planet.name = name
-        planet.diameter = diameter
-        planet.rotation_period = rotation_period
-        planet.orbital_period = orbital_period
-        planet.gravity = gravity
-        planet.population = population
-        planet.climate = climate
-        planet.terrain = terrain
-        planet.surface_water = surface_water
+        planet.name = request.json.get('name')
+        planet.diameter = request.json.get('diameter')
+        planet.rotation_period = request.json.get('rotation_period')
+        planet.orbital_period = request.json.get('orbital_period')
+        planet.gravity = request.json.get('gravity')
+        planet.population = request.json.get('population')
+        planet.climate = request.json.get('climate')
+        planet.terrain = request.json.get('terrain')
+        planet.surface_water = request.json.get('surface_water')
 
         planet.save()
         return jsonify({"Success": "created"}), 201
@@ -112,6 +112,37 @@ def get_planet(planet_id):
     planet = list(planet.serialize())
     return jsonify(planet), 200
 
+@app.route('/api/planet/<int:planet_id>', methods=['PUT'])
+@jwt_required()
+def put_planet(planet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).one_or_none()
+    if user.id == 1:
+        planet = Planet.query.get(planet_id)
+        if request.json.get('name') is not None:
+            planet.name = request.json.get('name')
+        if request.json.get('diameter') is not None:
+            planet.diameter = request.json.get('diameter')
+        if request.json.get('rotation_period') is not None:
+            planet.rotation_period = request.json.get('rotation_period')
+        if request.json.get('orbital_period') is not None:
+            planet.orbital_period = request.json.get('orbital_period')
+        if request.json.get('gravity') is not None:
+            planet.gravity = request.json.get('gravity')
+        if request.json.get('population') is not None:
+            planet.population = request.json.get('population')
+        if request.json.get('climate') is not None:
+            planet.climate = request.json.get('climate')
+        if request.json.get('terrain') is not None:
+            planet.terrain = request.json.get('terrain')
+        if request.json.get('surface_water') is not None:
+            planet.surface_water = request.json.get('surface_water')
+
+        planet.update()
+        return jsonify({"Success": "Changes apply"}), 202
+    else:
+        return jsonify({"Error": "You don´t have permissions for this"}), 402
+
 @app.route('/api/specie', methods=['GET', 'POST'])
 def species():
     if(request.method == 'GET'):
@@ -120,28 +151,17 @@ def species():
         return jsonify(species), 200
 
     if(request.method == 'POST'):
-        name = request.json.get('name')
-        classification = request.json.get('classification')
-        designation = request.json.get('designation')
-        average_height = request.json.get('average_height')
-        average_lifespan = request.json.get('average_lifespan')
-        hair_colors = request.json.get('hair_colors')
-        skin_colors = request.json.get('skin_colors')
-        eye_colors = request.json.get('eye_colors')
-        homeworld = request.json.get('homeworld')
-        language = request.json.get('language')
-
         specie = Specie()
-        specie.name = name
-        specie.classification = classification
-        specie.designation = designation
-        specie.average_height = average_height
-        specie.average_lifespan = average_lifespan
-        specie.hair_colors = hair_colors
-        specie.skin_colors = skin_colors
-        specie.eye_colors = eye_colors
-        specie.homeworld = homeworld
-        specie.language = language
+        specie.name = request.json.get('name')
+        specie.classification = request.json.get('classification')
+        specie.designation = request.json.get('designation')
+        specie.average_height = request.json.get('average_height')
+        specie.average_lifespan = request.json.get('average_lifespan')
+        specie.hair_colors = request.json.get('hair_colors')
+        specie.skin_colors =request.json.get('skin_colors')
+        specie.eye_colors = request.json.get('eye_colors')
+        specie.homeworld = request.json.get('homeworld')
+        specie.language = request.json.get('language')
 
         specie.save()
         return jsonify({"Success": "created"}), 201
@@ -152,6 +172,40 @@ def get_specie(specie_id):
     specie = list(specie.serialize())
     return jsonify(specie), 200
 
+@app.route('/api/specie/<int:specie_id>', methods=['PUT'])
+@jwt_required()
+def put_specie(specie_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).one_or_none()
+    if user.id == 1:
+        specie = Specie.query.get(specie_id)
+
+        if request.json.get('name') is not None:
+            specie.name = request.json.get('name')
+        if request.json.get('classification') is not None:
+            specie.classification = request.json.get('classification')
+        if request.json.get('designation') is not None:
+            specie.designation = request.json.get('designation')
+        if request.json.get('average_height') is not None:
+            specie.average_height = request.json.get('average_height')
+        if request.json.get('average_lifespan') is not None:
+            specie.average_lifespan = request.json.get('average_lifespan')
+        if request.json.get('hair_colors') is not None:
+            specie.hair_colors = request.json.get('hair_colors')
+        if request.json.get('skin_colors') is not None:
+            specie.skin_colors = request.json.get('skin_colors')
+        if request.json.get('eye_colors') is not None:
+            specie.eye_colors = request.json.get('eye_colors')
+        if request.json.get('homeworld') is not None:
+            specie.homeworld = request.json.get('homeworld')
+        if request.json.get('language') is not None:
+            specie.language = request.json.get('language')
+
+        specie.update()
+        return jsonify({"Success": "Changes apply"}), 202
+    else:
+        return jsonify({"Error": "You don´t have permissions for this"}), 402
+
 @app.route('/api/starship', methods=['GET', 'POST'])
 def starships():
     if(request.method == 'GET'):
@@ -160,34 +214,20 @@ def starships():
         return jsonify(starships), 200
 
     if(request.method == 'POST'):
-        name = request.json.get('name')
-        model = request.json.get('model')
-        starship_class = request.json.get('starship_class')
-        manufacturer = request.json.get('manufacturer')
-        cost_in_credits = request.json.get('cost_in_credits')
-        length = request.json.get('length')
-        crew = request.json.get('crew')
-        passengers = request.json.get('passengers')
-        max_atmosphering_speed = request.json.get('max_atmosphering_speed')
-        hyperdrive_rating = request.json.get('hyperdrive_rating')
-        MGLT = request.json.get('MGLT')
-        cargo_capacity = request.json.get('cargo_capacity')
-        consumables = request.json.get('consumables')
-
         starship = Starship()
-        starship.name = name
-        starship.model = model
-        starship.starship_class = starship_class
-        starship.manufacturer = manufacturer
-        starship.cost_in_credits = cost_in_credits
-        starship.lenght = length
-        starship.crew = crew
-        starship.passengers = passengers
-        starship.max_atmosphering_speed = max_atmosphering_speed
-        starship.hyperdrive_rating = hyperdrive_rating
-        starship.MGLT = MGLT
-        starship.cargo_capacity = cargo_capacity
-        starship.consumables = consumables
+        starship.name = request.json.get('name')
+        starship.model = request.json.get('model')
+        starship.starship_class = request.json.get('starship_class')
+        starship.manufacturer = request.json.get('manufacturer')
+        starship.cost_in_credits = request.json.get('cost_in_credits')
+        starship.length = request.json.get('length')
+        starship.crew = request.json.get('crew')
+        starship.passengers = request.json.get('passengers')
+        starship.max_atmosphering_speed = request.json.get('max_atmosphering_speed')
+        starship.hyperdrive_rating = request.json.get('hyperdrive_rating')
+        starship.MGLT = request.json.get('MGLT')
+        starship.cargo_capacity = request.json.get('cargo_capacity')
+        starship.consumables = request.json.get('consumables')
 
         starship.save()
         return jsonify({"Success": "created"}), 201
@@ -198,6 +238,45 @@ def get_starship(starship_id):
     starship = list(starship.serialize())
     return jsonify(starship), 200
 
+@app.route('/api/startship/<int:starship_id>', methods=['PUT'])
+@jwt_required()
+def put_starship(starship_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).one_or_none()
+    if user.id == 1:
+        starship = Starship.query.get(starship_id)
+
+        if request.json.get('name') is not None:
+            starship.name = request.json.get('name')
+        if request.json.get('model') is not None:
+            starship.model = request.json.get('model')
+        if request.json.get('starship_class') is not None:
+            starship.starship_class = request.json.get('starship_class')
+        if request.json.get('manufacturer') is not None:
+            starship.manufacturer = request.json.get('manufacturer')
+        if request.json.get('cost_in_credits') is not None:
+            starship.cost_in_credits = request.json.get('cost_in_credits')
+        if request.json.get('length') is not None:
+            starship.length = request.json.get('length')
+        if request.json.get('crew') is not None:
+            starship.crew = request.json.get('crew')
+        if request.json.get('passengers') is not None:
+            starship.passengers = request.json.get('passengers')
+        if request.json.get('max_atmosphering_speed') is not None:
+            starship.max_atmosphering_speed = request.json.get('max_atmosphering_speed')
+        if request.json.get('hyperdrive_rating') is not None:
+            starship.hyperdrive_rating = request.json.get('hyperdrive_rating')
+        if request.json.get('MGLT') is not None:
+            starship.MGLT = request.json.get('MGLT')
+        if request.json.get('cargo_capacity') is not None:
+            starship.cargo_capacity = request.json.get('cargo_capacity')
+        if request.json.get('consumables') is not None:
+            starship.consumables = request.json.get('consumables')
+
+        starship.update()
+        return jsonify({"Success": "Changes apply"})
+    else:
+        return jsonify({"Error": "You don´t have permissions for this"}), 402
 
 @app.route('/api/users', methods=['GET', 'POST'])
 def users():
@@ -207,14 +286,10 @@ def users():
         return jsonify(users), 200
     
     if(request.method == 'POST'):
-        username = request.json.get('username')
-        email = request.json.get('email')
-        password = request.json.get('password')
-
         user = User()
-        user.username = username
-        user.email = email
-        user.password = password
+        user.username = request.json.get('username')
+        user.email = request.json.get('email')
+        user.password = request.json.get('password')
 
         user.save()
         return jsonify('Success created'), 201
@@ -299,7 +374,7 @@ def favorite_specie(specie_id):
         favorite = Favorite.query.filter_by(favorite_id=specie_id, favorite_type="specie", user_id = user.id).first()
         favorite.delete()
 
-        return jsonify({ "success": "Specie deleted from favorites"}), 200
+        return jsonify({"success": "Specie deleted from favorites"}), 200
 
 app.route('/api/favorite/starship/<int:starship_id>', methods=['POST', 'DELETE'])
 def favorite_starship(starship_id):
@@ -322,7 +397,7 @@ def favorite_starship(starship_id):
         favorite = Favorite.query.filter_by(favorite_id=starship_id, favorite_type="starship", user_id = user.id).first()
         favorite.delete()
 
-        return jsonify({ "success": "Starship deleted from favorites"}), 200
+        return jsonify({"success": "Starship deleted from favorites"}), 200
     
 if __name__ == '__main__':
     app.run()
