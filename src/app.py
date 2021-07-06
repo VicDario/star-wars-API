@@ -180,7 +180,7 @@ def starships():
         starship.starship_class = starship_class
         starship.manufacturer = manufacturer
         starship.cost_in_credits = cost_in_credits
-        starship.length = length
+        starship.lenght = length
         starship.crew = crew
         starship.passengers = passengers
         starship.max_atmosphering_speed = max_atmosphering_speed
@@ -220,16 +220,25 @@ def users():
         return jsonify('Success created'), 201
 
 @app.route('/api/users/favorite', methods=['GET'])
+@jwt_required()
 def get_favorites():
-    favorites = Favorite.query.all()
-    favorites = list(map(lambda favorite: favorite.serialize(), favorites))
-    return jsonify(favorites), 200
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).one_or_none()
+    if user is None:
+        return jsonify({"Error": "No valid user"})
+    return jsonify(User.serialize_favorites(user)), 200
+
+
 
 @app.route('/api/favorite/planet/<int:planet_id>', methods=['POST', 'DELETE'])
+@jwt_required()
 def favorite_planet(planet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).one_or_none()
     if(request.method == 'POST'):
-        user = User.query.get(1) 
-
+        planet = Planet.query.get(planet_id)
+        if planet is None:
+            return jsonify({"Error": "Item not founded"}), 403
         favorite = Favorite()
         favorite.favorite_type = "planet"
         favorite.favorite_id = planet_id
@@ -239,16 +248,20 @@ def favorite_planet(planet_id):
         return jsonify("Successfully added"), 201
 
     if(request.method == 'DELETE'):
-        favorite = Favorite.query.filter_by(favorite_id=planet_id, favorite_type="planet", user_id = 1).first()
+        favorite = Favorite.query.filter_by(favorite_id=planet_id, favorite_type="planet", user_id = user.id).first()
         favorite.delete()
         
         return jsonify({"success": "Planet deleted from favorites"}), 200
 
 @app.route('/api/favorite/people/<int:people_id>', methods=['POST', 'DELETE'])
+@jwt_required()
 def favorite_people(people_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).one_or_none()
     if(request.method == 'POST'):
-        user = User.query.get(1) 
-
+        people = People.query.get(people_id)
+        if people is None:
+            return jsonify({"Error": "Item not founded"}), 403
         favorite = Favorite()
         favorite.favorite_type = "people"
         favorite.favorite_id = people_id
@@ -259,16 +272,20 @@ def favorite_people(people_id):
         return jsonify("Successfully added"), 201
 
     if(request.method == 'DELETE'):
-        favorite = Favorite.query.filter_by(favorite_id=people_id, favorite_type="people", user_id = 1).first()
+        favorite = Favorite.query.filter_by(favorite_id=people_id, favorite_type="people", user_id = user.id).first()
         favorite.delete()
 
         return jsonify({ "success": "People deleted from favorites"}), 200
 
 app.route('/api/favorite/specie/<int:specie_id>', methods=['POST', 'DELETE'])
+@jwt_required()
 def favorite_specie(specie_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).one_or_none()
     if(request.method == 'POST'):
-        user = User.query.get(1) 
-
+        specie = Specie.query.get(specie_id)
+        if specie is None:
+            return jsonify({"Error": "Item not founded"}), 403
         favorite = Favorite()
         favorite.favorite_type = "specie"
         favorite.favorite_id = specie_id
@@ -279,18 +296,21 @@ def favorite_specie(specie_id):
         return jsonify("Successfully added"), 201
 
     if(request.method == 'DELETE'):
-        favorite = Favorite.query.filter_by(favorite_id=specie_id, favorite_type="specie", user_id = 1).first()
+        favorite = Favorite.query.filter_by(favorite_id=specie_id, favorite_type="specie", user_id = user.id).first()
         favorite.delete()
 
         return jsonify({ "success": "Specie deleted from favorites"}), 200
 
 app.route('/api/favorite/starship/<int:starship_id>', methods=['POST', 'DELETE'])
 def favorite_starship(starship_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).one_or_none()
     if(request.method == 'POST'):
-        user = User.query.get(1) 
-
+        starship = Starship.query.get(starship_id)
+        if starship is None:
+            return jsonify({"Error": "Item not founded"}), 403
         favorite = Favorite()
-        favorite.favorite_type = "specie"
+        favorite.favorite_type = "starship"
         favorite.favorite_id = starship_id
         favorite.user_id = user.id
 
@@ -299,7 +319,7 @@ def favorite_starship(starship_id):
         return jsonify("Successfully added"), 201
 
     if(request.method == 'DELETE'):
-        favorite = Favorite.query.filter_by(favorite_id=starship_id, favorite_type="starship", user_id = 1).first()
+        favorite = Favorite.query.filter_by(favorite_id=starship_id, favorite_type="starship", user_id = user.id).first()
         favorite.delete()
 
         return jsonify({ "success": "Starship deleted from favorites"}), 200
