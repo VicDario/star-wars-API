@@ -61,8 +61,9 @@ def all_people():
 @app.route('/api/people/<int:people_id>', methods=['GET'])
 def get_person(people_id):
     person = People.query.get(people_id)
-    person = list(person.serialize())
-    return jsonify(person), 200
+    if person is None:
+        return jsonify({"Error": "Item not found"}), 404
+    return jsonify(person.serialize()), 200
 
 
 @app.route('/api/people/<int:people_id>', methods=['PUT'])
@@ -82,9 +83,9 @@ def put_people(people_id):
         people.gender = request.json.get('gender', people.gender)
 
         people.update()
-        return jsonify({"Success": "Changes apply"})
+        return jsonify({"Success": "Changes apply"}), 202
     else:
-        return jsonify({"Error": "You don´t have permissions for this"})
+        return jsonify({"Error": "You don´t have permissions for this"}), 402
 
 
 @app.route('/api/planet', methods=['GET', 'POST'])
@@ -113,8 +114,9 @@ def planets():
 @app.route('/api/planet/<int:planet_id>', methods=['GET'])
 def get_planet(planet_id):
     planet = Planet.query.get(planet_id)
-    planet = list(planet.serialize())
-    return jsonify(planet), 200
+    if planet is None:
+        return jsonify({"Error": "Item not found"}), 404
+    return jsonify(planet.serialize()), 200
 
 
 @app.route('/api/planet/<int:planet_id>', methods=['PUT'])
@@ -168,8 +170,9 @@ def species():
 @app.route('/api/specie/<int:specie_id>', methods=['GET'])
 def get_specie(specie_id):
     specie = Specie.query.get(specie_id)
-    specie = list(specie.serialize())
-    return jsonify(specie), 200
+    if specie is None:
+        return jsonify({"Error": "Item not found"}), 404
+    return jsonify(specie.serialize()), 200
 
 
 @app.route('/api/specie/<int:specie_id>', methods=['PUT'])
@@ -227,8 +230,9 @@ def starships():
 @app.route('/api/starship/<int:starship_id>', methods=['GET'])
 def get_starship(starship_id):
     starship = Starship.query.get(starship_id)
-    starship = list(starship.serialize())
-    return jsonify(starship), 200
+    if starship is None:
+        return jsonify({"Error": "Item not found"}), 404
+    return jsonify(starship.serialize()), 200
 
 
 @app.route('/api/startship/<int:starship_id>', methods=['PUT'])
