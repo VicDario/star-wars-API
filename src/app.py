@@ -1,4 +1,4 @@
-
+from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import timedelta
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
@@ -27,13 +27,12 @@ jwt = JWTManager(app)
 def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
-    user = User.query.filter_by(username=username, password=password).first()
-    if user is None:
+    user = User.query.filter_by(username=username).first()        
+    if user is not None and check_password_hash(user.password, password):
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token)
+    else:
         return jsonify({"Error": "Bad username or password"}), 401
-
-    access_token = create_access_token(identity=username)
-    return jsonify(access_token=access_token)
-
 
 @app.route('/api/people', methods=['GET', 'POST'])
 def all_people():
@@ -257,22 +256,21 @@ def put_starship(starship_id):
         return jsonify({"Error": "You don´t have permissions for this"}), 402
 
 
-@app.route('/api/users', methods=['GET', 'POST'])
+@app.route('/api/user/register', methods=['POST'])
 def users():
-    if(request.method == 'GET'):
-        users = User.query.all()
-        users = list(map(lambda user: user.serialize(), users))
-        return jsonify(users), 200
-
     if(request.method == 'POST'):
         user = User()
         user.username = request.json.get('username')
         user.email = request.json.get('email')
-        user.password = request.json.get('password')
+        user.password = generate_password_hash(request.json.get('password'))
 
         user.save()
         return jsonify('Success created'), 201
 
+@app.route('/api/user', methods=['GET'])
+@jwt_required()
+def user_info():
+    pass
 
 @app.route('/api/users/favorite', methods=['GET'])
 @jwt_required()
