@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Wars API</title>
+</head>
+<body>
+    <h1>Star Wars API 0.1</h1>
+    <h2>Login</h2>
+    <code>[POST] "/login"<br>required: {username, password}</code>
+    <h2>Register</h2>
+    <code>[POST] "/api/user/register"<br>required: {username, password, email}</code>
+    <h2>User</h2>
+    <h3>To GET user's info</h3>
+    <code>[GET] "api/user"<br>Needs login</code>
+    <h3>To GET user´s favorites</h3>
+    <code>[GET] "api/user/favorites<br>Needs login</code>
+    <h2>Items info</h2>
+    <h3>Items List</h3>
+    <code>[GET] "/people"</code><br>
+    <code>[GET] "/planet"</code><br>
+    <code>[GET] "/specie"</code><br>
+    <code>[GET] "/starship"</code><br>
+    <h3>To GET a specific item</h3>
+    <code>[GET] "/people/(people_id)"</code><br>
+    <code>[GET] "/planet/(planet_id)"</code><br>
+    <code>[GET] "/specie/(specie_id)"</code><br>
+    <code>[GET] "/starship/(starship_id)"</code><br>
+</body>
+</html>

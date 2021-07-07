@@ -1,6 +1,6 @@
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import timedelta
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_migrate import Migrate
 from models import Favorite, Planet, Specie, Starship, User, db, People
 from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity
@@ -22,8 +22,11 @@ Migrate(app, db)  # init, migrate, upgrade
 
 jwt = JWTManager(app)
 
+@app.route('/')
+def main():
+    return render_template('index.html') # Documentation
 
-@app.route("/login", methods=["POST"])
+@app.route("/api/login", methods=["POST"])
 def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
@@ -270,15 +273,15 @@ def users():
 @app.route('/api/user', methods=['GET'])
 @jwt_required()
 def user_info():
-    pass
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).one_or_none()
+    return jsonify(user.serialize())
 
-@app.route('/api/users/favorite', methods=['GET'])
+@app.route('/api/user/favorites', methods=['GET'])
 @jwt_required()
 def get_favorites():
     current_user = get_jwt_identity()
     user = User.query.filter_by(username=current_user).one_or_none()
-    if user is None:
-        return jsonify({"Error": "No valid user"})
     return jsonify(User.serialize_favorites(user)), 200
 
 
